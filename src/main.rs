@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use iced::{
     button, executor, Alignment, Application, Button, Column, Command, Element, Error, Image,
-    Length, Settings, Text,
+    Length, Row, Settings, Text,
 };
 use native_dialog::FileDialog;
 
@@ -10,6 +10,8 @@ use native_dialog::FileDialog;
 struct PicViewer {
     pic_path: Option<PathBuf>,
     explore_picture: button::State,
+    next: button::State,
+    prev: button::State,
 }
 
 #[derive(Debug, Clone)]
@@ -33,27 +35,33 @@ impl Application for PicViewer {
             PicViewer {
                 pic_path: Option::None,
                 explore_picture: button::State::new(),
+                next: button::State::new(),
+                prev: button::State::new(),
             },
             Command::none(),
         )
     }
 
     fn view(&mut self) -> Element<Self::Message> {
+        let top_buttons = Row::new()
+            .push(
+                Button::new(&mut self.explore_picture, Text::new("test"))
+                    .on_press(Message::OpenFile),
+            )
+            .push(Button::new(&mut self.prev, Text::new("Prev")))
+            .push(Button::new(&mut self.next, Text::new("Next")));
+
         let mut controls = Column::new()
             .padding(10)
             .align_items(Alignment::Center)
-            .width(Length::Fill);
+            .width(Length::Fill)
+            .push(top_buttons);
 
         if let Some(pic_path) = &self.pic_path {
             controls = controls.push(Image::new(pic_path));
         }
 
-        controls
-            .push(
-                Button::new(&mut self.explore_picture, Text::new("test"))
-                    .on_press(Message::OpenFile),
-            )
-            .into()
+        controls.into()
     }
 
     fn update(&mut self, message: Message) -> Command<Self::Message> {
